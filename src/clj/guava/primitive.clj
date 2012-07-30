@@ -7,25 +7,25 @@
             Longs UnsignedLong UnsignedLongs
             Floats Doubles Chars Booleans Shorts]))
 
-(set! *warn-on-reflection* true)
+;(set! *warn-on-reflection* true)
 
 ; length in bytes
-(def ^{:tag Integer :added "0.1"}
+(def ^:const ^{:tag Integer :added "0.1"}
   byte-bytes (int 1))
 
-(def ^{:tag Integer :added "0.1"}
+(def ^:const ^{:tag Integer :added "0.1"}
   char-bytes Chars/BYTES)
 
-(def ^{:tag Integer :added "0.1"}
+(def ^:const ^{:tag Integer :added "0.1"}
   int-bytes Ints/BYTES)
 
-(def ^{:tag Integer :added "0.1"}
+(def ^:const ^{:tag Integer :added "0.1"}
   float-bytes Floats/BYTES)
 
-(def ^{:tag Integer :added "0.1"}
+(def ^:const ^{:tag Integer :added "0.1"}
   double-bytes Doubles/BYTES)
 
-(def ^{:tag Integer :added "0.1"}
+(def ^:const ^{:tag Integer :added "0.1"}
   long-bytes Longs/BYTES)
 
 (defn finite-double?
