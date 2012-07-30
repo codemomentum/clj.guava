@@ -7,49 +7,82 @@
             Longs UnsignedLong UnsignedLongs
             Floats Doubles Chars Booleans Shorts]))
 
+(set! *warn-on-reflection* true)
+
 ; length in bytes
-(def byte-bytes 1)
+(def ^{:tag Integer :added "0.1"}
+  byte-bytes (int 1))
 
-(def char-bytes Chars/BYTES)
+(def ^{:tag Integer :added "0.1"}
+  char-bytes Chars/BYTES)
 
-(def int-bytes Ints/BYTES)
+(def ^{:tag Integer :added "0.1"}
+  int-bytes Ints/BYTES)
 
-(def float-bytes Floats/BYTES)
+(def ^{:tag Integer :added "0.1"}
+  float-bytes Floats/BYTES)
 
-(def double-bytes Doubles/BYTES)
+(def ^{:tag Integer :added "0.1"}
+  double-bytes Doubles/BYTES)
 
-(def long-bytes Longs/BYTES)
+(def ^{:tag Integer :added "0.1"}
+  long-bytes Longs/BYTES)
 
-; finit double 
-(defn finite-double? [arg]
+(defn finite-double?
+  "Return true if a double is neither Infinity nor NaN"
+  ^{:tag Boolean :added "0.1"}
+  [arg]
   (Doubles/isFinite arg))
 
 ; use Doubles here! Because clojure's / operator convert float Infinity into double!
-(defn finite-float? [arg]
+(defn finite-float?
+  "Return true if a float is neither Infinity nor NaN"
+  ^{:tag Boolean :added "0.1"}
+  [arg]
   (Doubles/isFinite arg))
 
 ; transform between primitives and byte array
-(defn bytes->char [bytes]
+(defn bytes->char
+  "Parse a char from byte array representation"
+  ^{:tag Character :added "0.1"}
+  [bytes]
   (Chars/fromByteArray bytes))
 
-(defn char->bytes [c]
+(defn char->bytes
+  ^{:tag bytes :added "0.1"}
+  [c]
   (Chars/toByteArray c))
 
-(defn bytes->int [bytes]
+(defn bytes->int
+  "Parse a int from byte array representation"
+  ^{:tag Integer :added "0.1"}
+  [bytes]
   (Ints/fromByteArray bytes))
 
-(defn int->bytes [n]
+(defn int->bytes
+  ^{:tag bytes :added "0.1"}
+  [n]
   (Ints/toByteArray n))
 
-(defn short->bytes [s]
+(defn short->bytes
+  ^{:tag Short :added "0.1"}
+  [s]
   (Shorts/toByteArray s))
 
-(defn bytes->short [bytes]
+(defn bytes->short
+  "Parse a short from byte array representation"
+  ^{:tag bytes :added "0.1"}
+  [bytes]
   (Shorts/fromByteArray bytes))
 
-(defn long->bytes [l]
+(defn long->bytes
+  ^{:tag bytes :added "0.1"}
+  [l]
   (Longs/toByteArray l))
 
-(defn bytes->long [bytes]
+(defn bytes->long
+  "Parse a long from byte array representation"
+  ^{:tag Long :added "0.1"}
+  [bytes]
   (Longs/fromByteArray bytes))
 
