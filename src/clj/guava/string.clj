@@ -1,12 +1,13 @@
 (ns ^{ :doc "Wrapper for guava string classes and methods"
       :author "dennis zhuang<killme2008@gmail.com>"}
   clj.guava.string
+  (:refer-clojure :exclude [range and or count replace remove])
   (:import [com.google.common.base Joiner Splitter CharMatcher Charsets Strings]))
 
 (defn- ^String ->str [s ^String msg]
   (if s
     (str s)
-    (throw (NullPointerException. msg))))
+    (throw (IllegalArgumentException. msg))))
 
 (defn ->char [s]
   "Cast a character or CharSequence to character,otherwise throw exception.If it is a CharSequence,use CharSequence.charAt(0)."
@@ -14,7 +15,7 @@
   (condp instance? s
     CharSequence (.charAt ^CharSequence s 0)
     Character s
-    (throw (ClassCastException. (format "try to cast % to %" (type s) Character)))))
+    (throw (ClassCastException. (format "try to cast % to character" (type s))))))
 
 (definline empty->nil
   "Returns the given string if it is nonempty; nil otherwise."
@@ -223,6 +224,7 @@
        (lazy-seq (.getBytes string (->str charset "nil charset"))))))
 
 
+;;CharMatcher creation and manipulation
 (defn- guava-char-macher-name [^String name]
   (.replace (.toUpperCase name) "_" "-"))
 
@@ -236,7 +238,6 @@
 
 (def ALL-MATCHERS
   (doall (map #(.get ^java.lang.reflect.Field % nil) (seq (.getFields CharMatcher)))))
-
 
 (defmacro ^:private defmatcher
   [name new-name doc added]
@@ -252,74 +253,74 @@
             cm#)))))
 
 ;;Define functions to create char macher.
-(defmatcher anyOf cm-any "Returns a char matcher that matches any character present in the given character sequence." "0.1")
+(defmatcher anyOf any "Returns a char matcher that matches any character present in the given character sequence." "0.1")
 
-(defmatcher noneOf cm-none "Returns a char matcher that matches any character not present in the given character sequence." "0.1")
+(defmatcher noneOf none "Returns a char matcher that matches any character not present in the given character sequence." "0.1")
 
-(defmatcher is cm-is "Returns a char matcher that matches only one specified character." "0.1")
+(defmatcher is is "Returns a char matcher that matches only one specified character." "0.1")
 
-(defmatcher isNot cm-is-not "Returns a char matcher that matches any character except the one specified." "0.1")
+(defmatcher isNot is-not "Returns a char matcher that matches any character except the one specified." "0.1")
 
-(defn cm-range
+(defn range
   " Returns a char matcher that matches any character in a given range (both endpoints are inclusive)."
   {:tag CharMatcher :added "0.1"}
   [start end]
   (CharMatcher/inRange (->char start) (->char end)))
 
-(defn cm-and
+(defn and
   "Returns a matcher that matches any character matched by both this matcher and other."
   {:tag CharMatcher :added "0.1"}
   [^CharMatcher x ^CharMatcher y]
   (.and x y))
 
-(defn cm-or
+(defn or
   "Returns a matcher that matches any character matched by either this matcher or other."
   {:tag CharMatcher :added "0.1"}
   [^CharMatcher x ^CharMatcher y]
   (.or x y))
 
-(defn cm-neg
+(defn neg
   "Returns a matcher that matches any character not matched by this matcher."
   {:tag CharMatcher :added "0.1"}
   [^CharMatcher x]
   (.negate x))
 
-;;Define char macher functions for usage.
+;;CharMatcher applications.
 
-(definline cm-collapse
+(definline collapse
   "Returns a string copy of the input character sequence, with each group of consecutive characters that match this matcher replaced by a single replacement character."
   {:tag String :added "0.1"}
   [^CharMatcher cm ^CharSequence s ^Character ch]
   `(.collapseFrom ~cm ~s (->char ~ch)))
 
-(definline cm-count
+(definline count
   " Returns the number of matching characters found in a character sequence."
   {:added "0.1"}
   [^CharMatcher cm ^CharSequence s]
   `(.countIn ~cm ~s))
 
-(defn cm-index
+(defn index
   "Returns the index of the first matching character in a character sequence, or -1 if no matching character is present."
   {:added "0.1"}
   ([cm s]
-     (cm-index cm s 0))
+     (index cm s 0))
   ([^CharMatcher cm ^CharSequence s start]
      (.indexIn cm s start)))
 
-(definline cm-last-index
+(definline last-index
   "Returns the index of the last matching character in a character sequence, or -1 if no matching character is present."
   {:added "0.1"}
   [^CharMatcher cm ^CharSequence s]
   `(.lastIndexIn ~cm ~s))
 
-(defn cm-matches
+(defn matches
   "Determines a true or false value for the given character or string. Valid types:
       :any   returns true if a character sequence contains at least one matching character.
       :all   returns true if a character sequence contains only matching characters.
       :none  returns true if a character sequence contains no matching characters."
   {:tag boolean :added "0.1"}
   ([^CharMatcher cm ch]
-     (cm-matches cm (->str ch "nil char sequence to match.") :all))
+     (matches cm (->str ch "nil char sequence to match.") :all))
   ([^CharMatcher cm ^CharSequence s type]
      (condp = type
        :all (.matchesAllOf cm s)
@@ -327,37 +328,37 @@
        :none (.matchesNoneOf cm s)
        (throw (IllegalArgumentException. (format "Unknow maches type %s,valid types include :all :any :none." type))))))
 
-(defn cm-replace
+(defn replace
   "Returns a string copy of the input character sequence, with each character that matches this matcher replaced by a given replacement character."
   {:added "0.1" :tag String}
   [^CharMatcher cm ^CharSequence s replacement]
   (.replaceFrom cm s (->str replacement "nil replacement")))
 
-(defn cm-remove
+(defn remove
   "Returns a string containing all non-matching characters of a character sequence, in order."
   {:added "0.1" :tag String}
   [^CharMatcher cm ^CharSequence s]
   (.removeFrom cm s))
 
-(defn cm-retain
+(defn retain
   " Returns a string containing all matching characters of a character sequence, in order."
   {:added "0.1" :tag String}
   [^CharMatcher cm ^CharSequence s]
   (.retainFrom cm s))
 
-(defn cm-trim
+(defn trim
   "Returns a substring of the input character sequence that omits all characters this matcher matches from the beginning and from the end of the string."
   {:added "0.1" :tag String}
   [^CharMatcher cm ^CharSequence s]
   (.trimFrom cm s))
 
-(defn cm-triml
+(defn triml
   "Returns a substring of the input character sequence that omits all characters this matcher matches from the beginning of the string."
   {:added "0.1" :tag String}
   [^CharMatcher cm ^CharSequence s]
   (.trimLeadingFrom cm s))
 
-(defn cm-trimr
+(defn trimr
   "Returns a substring of the input character sequence that omits all characters this matcher matches from the end of the string."
   {:added "0.1" :tag String}
   [^CharMatcher cm ^CharSequence s]

@@ -1,5 +1,6 @@
 (ns clj.guava.test.string
-  (:use [clj.guava.string])
+  (:refer-clojure :exclude [range and or count replace remove])
+  (:use [clj.guava.string :exclude [is]])
   (:import [com.google.common.base Joiner Splitter CharMatcher Charsets Strings])
   (:use [clojure.test]))
 
@@ -63,18 +64,18 @@
   (is (= '("foo" "bar" "qux") ((splitter "," :omit-emptys true :trims true) "foo,bar,,   qux"))))
 
 (deftest test-any-of
-  (let [cm1 (cm-range "A" "Z")
-        cm2 (cm-none "aeiou")
+  (let [cm1 (range "A" "Z")
+        cm2 (none "aeiou")
         cm3 WHITESPACE
         cm4 JAVA-DIGIT
         cm5 JAVA-LOWER-CASE
-        cm6 (cm-neg cm1)
-        cm7 (cm-or cm4 cm5)]
-    (is (= "WL" (cm-retain cm1 "hello WorLd")))
-    (is (= "hello ord" (cm-retain cm6 "hello WorLd")))
-    (is (= "123" (cm-retain cm4 "hello 123 world")))
-    (is (= "hello123world" (cm-retain cm7 "hello 123 world")))
-    (is (= "hello -or-d" (cm-replace cm1 "hello WorLd" "-")))
-    (is (= "hello -rld" (cm-collapse cm1 "hello WOrld" "-")))
+        cm6 (neg cm1)
+        cm7 (or cm4 cm5)]
+    (is (= "WL" (retain cm1 "hello WorLd")))
+    (is (= "hello ord" (retain cm6 "hello WorLd")))
+    (is (= "123" (retain cm4 "hello 123 world")))
+    (is (= "hello123world" (retain cm7 "hello 123 world")))
+    (is (= "hello -or-d" (replace cm1 "hello WorLd" "-")))
+    (is (= "hello -rld" (collapse cm1 "hello WOrld" "-")))
     )
   )
