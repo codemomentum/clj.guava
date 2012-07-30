@@ -3,11 +3,11 @@
   clj.guava.os
   (:use [clojure.string :only [join]]))
 
-(defn now
+(definline now
   "Returns the current time in milliseconds."
   {:added "0.1" :tag long}
   []
-  (System/currentTimeMillis))
+  `(System/currentTimeMillis))
 
 (defn- props->map
   "Cast a java.util.Properties to a clojure map"
@@ -82,6 +82,7 @@
      (exit 0))
   ([status]
      (when *warn-on-exit*
+       (println "System exit warning,you can close this by binding *warn-on-exit* to be false.")
        (println (format "System exit with status %d, dump thead:\r\n%s" status (join "r\n" (thread-dump))))
        (println "---------------------------------------------------------"))
      (System/exit status)))
