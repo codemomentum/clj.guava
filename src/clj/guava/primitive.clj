@@ -20,40 +20,36 @@
 
 (def long-bytes Longs/BYTES)
 
-; max unsinged primitives
-(def max-ulong UnsignedLong/MAX_VALUE)
-
-(def max-uint UnsignedInteger/MAX_VALUE)
-
-; finit float/double 
-(defn finit-double? [arg]
+; finit double 
+(defn finite-double? [arg]
   (Doubles/isFinite arg))
 
-(defn finit-float? [arg]
+; use Doubles here! Because clojure's / operator convert float Infinity into double!
+(defn finite-float? [arg]
   (Doubles/isFinite arg))
 
 ; transform between primitives and byte array
-(defn char-from-bytes [bytes]
+(defn bytes->char [bytes]
   (Chars/fromByteArray bytes))
 
-(defn char-to-bytes [c]
+(defn char->bytes [c]
   (Chars/toByteArray c))
 
-(defn int-from-bytes [bytes]
+(defn bytes->int [bytes]
   (Ints/fromByteArray bytes))
 
-(defn int-tobytes [n]
+(defn int->bytes [n]
   (Ints/toByteArray n))
 
-(defn short-from-bytes [bytes]
+(defn short->bytes [s]
+  (Shorts/toByteArray s))
+
+(defn bytes->short [bytes]
   (Shorts/fromByteArray bytes))
 
-(defn short-to-bytes [s]
-  (Shorts/toByteArray))
-
-(defn long-to-bytes [l]
+(defn long->bytes [l]
   (Longs/toByteArray l))
 
-(defn long-from-bytes [bytes]
+(defn bytes->long [bytes]
   (Longs/fromByteArray bytes))
 

@@ -33,12 +33,12 @@
 (deftest char-bytes-transform
   (testing "transforming between char and byte array"
     (for [k (range 0 256)]
-      (is (= (char k) (char-from-bytes (char-to-bytes (char k))))))
+      (is (= (char k) (bytes->char (char->bytes (char k))))))
     (for [k (range -2560 2560)]
-      (is (= (int k) (int-from-bytes (int-to-bytes (int k))))))
+      (is (= (int k) (bytes->int (int->bytes (int k))))))
     (for [k (range -256000 256000)]
-      (is (= k (long-from-bytes (long-to-bytes k)))))
+      (is (= k (bytes->long (long->bytes k)))))
     (for [k (range -256000 256000)]
-      (is (= (short k) (short-from-bytes (short-to-bytes (short k))))))
+      (is (= (short k) (bytes->short (short->bytes (short k))))))
 
     ))
