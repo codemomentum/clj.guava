@@ -23,7 +23,8 @@
      (let [bus {:name name
                 :handlers (atom {})
                 :events (mk-thread-local (LinkedList.))
-                :dispatching? (mk-thread-local false)}]
+                :dispatching? (mk-thread-local false)
+                :register-lock (Object.)}]
        bus)))
 
 (defn register!
@@ -34,8 +35,9 @@
     (throw (IllegalArgumentException. "event handler should be a function accepts a single param.")))
   (let [handlers (:handlers eventbus)
         this-handlers (@handlers event-name)]
-    (when-not this-handlers
-      (swap! handlers assoc-in [event-name] []))
+    (locking (:register-lock eventbus)
+      (when-not this-handlers
+        (swap! handlers assoc-in [event-name] [])))
     (swap! handlers update-in [event-name] conj handler)))
 
 (defn unregister!
