@@ -1,6 +1,6 @@
 ;; The usage of the eventbus is:
 ;; 1. create a eventbus
-;;   (def bus (mk-eventbus))
+;;   (def bus (eventbus))
 ;; 2. register your event handler function to the eventbus
 ;;   (register! bus event-name handler)
 ;; 3. then the event generator can post the event:
@@ -14,17 +14,17 @@
 
 (declare mk-thread-local dispatch)
 
-(defn mk-eventbus
+(defn eventbus
   "Creates a new eventbus with the specified name, if name not provided :default will be used."
   {:added "0.1"}
   ([]
-     (mk-eventbus :default))
+     (eventbus :default))
   ([name]
-     (let [eventbus {:name name
-                     :handlers (atom {})
-                     :events (mk-thread-local (LinkedList.))
-                     :dispatching? (mk-thread-local false)}]
-       eventbus)))
+     (let [bus {:name name
+                :handlers (atom {})
+                :events (mk-thread-local (LinkedList.))
+                :dispatching? (mk-thread-local false)}]
+       bus)))
 
 (defn register!
   "Register the event-handler to handle the specified event"

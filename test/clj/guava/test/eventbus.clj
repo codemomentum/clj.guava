@@ -2,18 +2,18 @@
   (:use [clojure.test])
   (:use [clj.guava.eventbus]))
 
-(deftest test-mk-eventbus
-  (let [bus (mk-eventbus)]
+(deftest test-eventbus
+  (let [bus (eventbus)]
     (is (= false (nil? bus)))
     (is (= false (nil? (:handlers bus))))
     (is (= false (nil? (:events bus))))
     (is (= :default (:name bus))))
-  (let [bus (mk-eventbus "test")]
+  (let [bus (eventbus "test")]
     (is (= false (nil? bus)))
     (is (= "test" (:name bus)))))
 
 (deftest test-register!
-  (let [bus (mk-eventbus)
+  (let [bus (eventbus)
         handlers (:handlers bus)
         fn1 (fn [str] str)
         fn2 (fn [str] (println str))]
@@ -26,11 +26,11 @@
     (is (= [fn1 fn2] (vec (@handlers "event1"))))))
 
 (deftest test-register!-not-fn
-  (let [bus (mk-eventbus)]
+  (let [bus (eventbus)]
     (is (thrown? IllegalArgumentException (register! bus "event" "not-a-handler")))))
 
 (deftest test-unregister!
-  (let [bus (mk-eventbus)
+  (let [bus (eventbus)
         handlers (:handlers bus)
         fn1 (fn [str] str)
         fn2 (fn [str] (println str))
@@ -57,7 +57,7 @@
     (swap! events conj event)))
 
 (deftest test-post!
-  (let [bus (mk-eventbus)
+  (let [bus (eventbus)
         events (atom [])
         event-catcher (mk-event-catcher events)]
     (register! bus "event" event-catcher)
@@ -67,7 +67,7 @@
     (is (= ["msg1" "msg2"] @events))))
 
 (deftest test-mutiple-handlers
-  (let [bus (mk-eventbus)
+  (let [bus (eventbus)
         events1 (atom [])
         event-catcher1 (mk-event-catcher events1)
         events2 (atom [])
@@ -80,7 +80,7 @@
     (is (= ["msg1" "msg2"] @events2))))
 
 (deftest test-dead-event
-  (let [bus (mk-eventbus)
+  (let [bus (eventbus)
         events (atom [])
         event-catcher (mk-event-catcher events)]
     (register! bus :dead-event event-catcher)
@@ -88,7 +88,7 @@
     (is (= [{:event-name "event" :event "msg1"}] @events))))
 
 (deftest test-multiple-events
-  (let [bus (mk-eventbus)
+  (let [bus (eventbus)
         events (atom [])
         event-catcher (mk-event-catcher events)]
     (register! bus "event" event-catcher)
@@ -103,7 +103,7 @@
   (throw (RuntimeException. "from ill-handler")))
 
 (deftest test-exception
-  (let [bus (mk-eventbus)
+  (let [bus (eventbus)
         has-error? (atom false)]
     (try
       (register! bus "event" ill-handler)
@@ -112,7 +112,7 @@
     (is (= false @has-error?))))
 
 (deftest test-multi-thread
-  (let [bus (mk-eventbus)
+  (let [bus (eventbus)
         events1 (atom [])
         event-catcher1 (mk-event-catcher events1)
         events2 (atom [])
