@@ -83,7 +83,7 @@
   (let [bus (eventbus)
         events (atom [])
         event-catcher (mk-event-catcher events)]
-    (register! bus :dead-event event-catcher)
+    (register! bus :dead event-catcher)
     (post! bus "event" "msg1")
     (is (= [{:event-name "event" :event "msg1"}] @events))))
 
@@ -103,13 +103,21 @@
   (throw (RuntimeException. "from ill-handler")))
 
 (deftest test-exception
+  ;; this test that even an handler throws an exception
+  ;; the whole eventbus still works
   (let [bus (eventbus)
-        has-error? (atom false)]
+        has-error? (atom false)
+        events (atom [])
+        event-catcher (mk-event-catcher events)]
     (try
       (register! bus "event" ill-handler)
+      (register! bus :exception event-catcher)
+      (post! bus "event" "msg")
       (catch Throwable e
         (reset! has-error? true)))
-    (is (= false @has-error?))))
+    (is (= false @has-error?))
+    (is (= 1 (count @events)))
+    (is (instance? RuntimeException (first @events)))))
 
 (deftest test-multi-thread
   (let [bus (eventbus)

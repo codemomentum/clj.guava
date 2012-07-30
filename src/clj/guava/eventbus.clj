@@ -81,10 +81,16 @@
                 (try
                   (handler event-obj)
                   (catch Throwable e
-                    (error e))))
-              ;; there is no event handler for this event, wrap them as :dead-event
-              ;; user code can register a handler for :dead-event to see whether there is
+                    (error e)
+                    ;; if user registered a event handler for :exception, then we 
+                    ;; post the exceptions to the :exception event, user can register
+                    ;; to handler to do some handling of the exception.
+                    (if (not-empty (@handlers :exception))
+                      (post! eventbus :exception e)))))
+              ;; there is no event handler for this event, wrap them as :dead event
+              ;; user code can register a handler for :dead to see whether there is
               ;; any event without event-handler
-              (post! eventbus :dead-event {:event-name event-name :event event-obj})))))
+              (if (not-empty (@handlers :dead))
+                (post! eventbus :dead {:event-name event-name :event event-obj}))))))
       (finally
        (.set ^ThreadLocal (:dispatching? eventbus) false)))))
