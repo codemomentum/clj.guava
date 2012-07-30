@@ -10,7 +10,8 @@
       :author "xumingming"}
   clj.guava.eventbus
   (:import [java.util LinkedList])
-  (:use [clojure.tools.logging :only [error]]))
+  (:use [clojure.tools.logging :only [error]])
+  (:use [clj.guava.base :only [check-arg]]))
 
 (declare mk-thread-local dispatch)
 
@@ -31,8 +32,7 @@
   "Register the event-handler to handle the specified event"
   {:added "0.1"}
   [eventbus event-name handler]
-  (when-not (fn? handler)
-    (throw (IllegalArgumentException. "event handler should be a function accepts a single param.")))
+  (check-arg (fn? handler) "event handler should be a function accepts a single param.")
   (let [handlers (:handlers eventbus)
         this-handlers (@handlers event-name)]
     (locking (:register-lock eventbus)
