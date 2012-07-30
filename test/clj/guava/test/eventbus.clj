@@ -110,3 +110,21 @@
       (catch Throwable e
         (reset! has-error? true)))
     (is (= false @has-error?))))
+
+(deftest test-multi-thread
+  (let [bus (mk-eventbus)
+        events1 (atom [])
+        event-catcher1 (mk-event-catcher events1)
+        events2 (atom [])
+        event-catcher2 (mk-event-catcher events2)]
+    (register! bus "event1" event-catcher1)
+    @(future
+       (register! bus "event2" event-catcher2))
+    (post! bus "event1" "msg1")
+    (post! bus "event2" "msg2")
+    @(future
+       (post! bus "event1" "msg3")
+       (post! bus "event2" "msg4"))
+
+    (is (= ["msg1" "msg3"] @events1))
+    (is (= ["msg2" "msg4"] @events2))))
