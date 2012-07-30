@@ -6,23 +6,70 @@
 ;; 3. then the event generator can post the event:
 ;;   (post! bus event-name event)
 
-
 (ns ^{:doc "Clojure version of guava eventbus, it is totally reimplemented"
-      :author "xumingmingv"}
+      :author "xumingming"}
   clj.guava.eventbus
-  (:import [java.util.concurrent ConcurrentLinkedQueue])
+  (:import [java.util LinkedList])
   (:use [clojure.tools.logging :only [error]]))
 
-(declare post!)
+(declare mk-thread-local dispatch)
+
+(defn mk-eventbus
+  "Creates a new eventbus with the specified name, if name not provided :default will be used."
+  {:added "0.1"}
+  ([]
+     (mk-eventbus :default))
+  ([name]
+     (let [eventbus {:name name
+                     :handlers (atom {})
+                     :events (mk-thread-local (LinkedList.))
+                     :dispatching? (mk-thread-local false)}]
+       eventbus)))
+
+(defn register!
+  "Register the event-handler to handle the specified event"
+  {:added "0.1"}
+  [eventbus event-name handler]
+  (when-not (fn? handler)
+    (throw (IllegalArgumentException. "event handler should be a function accepts a single param.")))
+  (let [handlers (:handlers eventbus)
+        this-handlers (get-in @handlers [event-name])]
+    (when-not this-handlers
+      (swap! handlers assoc-in [event-name] []))
+    (swap! handlers update-in [event-name] conj handler)))
+
+(defn unregister!
+  "Unregisers the event-handler from the event."
+  {:added "0.1"}
+  [eventbus event-name handler]
+  (let [handlers (:handlers eventbus)
+        this-handlers (@handlers event-name)]
+    (if this-handlers
+      (swap! handlers update-in [event-name] #(vec (remove #{handler} %)))
+      (throw (RuntimeException. (str "No such event registered: " event-name))))))
+
+(defn post!
+  "Post a event to the specified eventbus"
+  {:added "0.1"}
+  [eventbus event-name event]
+  (let [^LinkedList events (.get ^ThreadLocal (:events eventbus))]
+    (.addLast events {:event-name event-name :event event})
+    (dispatch eventbus)))
+
+(defn- mk-thread-local [init-value]
+  (proxy [ThreadLocal] []
+    (initialValue [] init-value)))
 
 (defn- dispatch [eventbus]
   "Dispatches the event to handlers."
-  (when-not @(:dispatching? eventbus)
-    (reset! (:dispatching? eventbus) true)
+  ;; here if dispatching is true, it means current thread is dispatching the thread
+  ;; then we just do nothing and leave this function to garantee the events dispatching order
+  (when-not (.get ^ThreadLocal (:dispatching? eventbus))
+    (.set ^ThreadLocal (:dispatching? eventbus) true)
     (try
-      (let [^ConcurrentLinkedQueue events (:events eventbus)]
+      (let [^LinkedList events (.get ^ThreadLocal (:events eventbus))]
         (while (not (empty? events))
-          (let [head-event (.poll events)
+          (let [head-event (.removeFirst events)
                 handlers (:handlers eventbus)
                 event-name (:event-name head-event)
                 event-obj (:event head-event)
@@ -40,47 +87,4 @@
               ;; there is any event without event-handler
               (post! eventbus :dead-event {:event-name event-name :event event-obj})))))
       (finally
-       (reset! (:dispatching? eventbus) false)))))
-
-(defn mk-eventbus
-  "Creates a new eventbus with the specified name, if name not provided :default will be used."
-  {:added "0.1"}
-  ([]
-     (mk-eventbus :default))
-  ([name]
-     (let [eventbus {:name name
-                     :handlers (atom {})
-                     :events (ConcurrentLinkedQueue.)
-                     :dispatching? (atom false)}]
-       eventbus)))
-
-(defn register!
-  "Register the event-handler to handle the specified event"
-  {:added "0.1"}
-  [eventbus event-name handler]
-  (when-not (fn? handler)
-    (throw (IllegalArgumentException. "event handler should be a function accepts a single param.")))
-  (let [handlers (:handlers eventbus)
-        this-handlers (get-in @handlers [event-name])]
-    (when-not this-handlers
-      (swap! handlers assoc-in [event-name] []))
-    (swap! handlers update-in [event-name] conj handler)))
-
-(defn unregister!
-  "Unregiser the event-handler."
-  {:added "0.1"}
-  [eventbus event-name handler]
-  (let [handlers (:handlers eventbus)
-        this-handlers (@handlers event-name)]
-    (if this-handlers
-      (swap! handlers update-in [event-name] #(vec (remove #{handler} %)))
-      (throw (RuntimeException. (str "No such event registered: " event-name))))))
-
-(defn post!
-  "Post a event to the specified eventbus"
-  {:added "0.1"}
-  [eventbus event-name event]
-  (let [^ConcurrentLinkedQueue events (:events eventbus)]
-    (.add events {:event-name event-name :event event})
-    (dispatch eventbus)))
-
+       (.set ^ThreadLocal (:dispatching? eventbus) false)))))
