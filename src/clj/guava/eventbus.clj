@@ -33,7 +33,7 @@
   (when-not (fn? handler)
     (throw (IllegalArgumentException. "event handler should be a function accepts a single param.")))
   (let [handlers (:handlers eventbus)
-        this-handlers (get-in @handlers [event-name])]
+        this-handlers (@handlers event-name)]
     (when-not this-handlers
       (swap! handlers assoc-in [event-name] []))
     (swap! handlers update-in [event-name] conj handler)))
