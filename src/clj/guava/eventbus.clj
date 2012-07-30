@@ -34,9 +34,10 @@
   [eventbus event-name handler]
   (check-arg (fn? handler) "event handler should be a function accepts a single param.")
   (let [handlers (:handlers eventbus)]
-    (locking (:register-lock eventbus)
-      (when-not (@handlers event-name)
-        (swap! handlers assoc-in [event-name] [])))
+    (when-not (@handlers event-name)
+      (locking (:register-lock eventbus)
+        (when-not (@handlers event-name)
+          (swap! handlers assoc-in [event-name] []))))
     (swap! handlers update-in [event-name] conj handler)))
 
 (defn unregister!
