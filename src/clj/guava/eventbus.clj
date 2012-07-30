@@ -53,7 +53,7 @@
   {:added "0.1"}
   [eventbus event-name event]
   (let [^LinkedList events (.get ^ThreadLocal (:events eventbus))]
-    (.addLast events {:event-name event-name :event event})
+    (.offer events {:event-name event-name :event event})
     (dispatch eventbus)))
 
 (defn- mk-thread-local [init-value]
@@ -62,14 +62,14 @@
 
 (defn- dispatch [eventbus]
   "Dispatches the event to handlers."
-  ;; here if dispatching is true, it means current thread is dispatching the thread
+  ;; here if dispatching is true, it means current thread is dispatching events
   ;; then we just do nothing and leave this function to garantee the events dispatching order
   (when-not (.get ^ThreadLocal (:dispatching? eventbus))
     (.set ^ThreadLocal (:dispatching? eventbus) true)
     (try
       (let [^LinkedList events (.get ^ThreadLocal (:events eventbus))]
         (while (not (empty? events))
-          (let [head-event (.removeFirst events)
+          (let [head-event (.poll events)
                 handlers (:handlers eventbus)
                 event-name (:event-name head-event)
                 event-obj (:event head-event)
@@ -83,8 +83,8 @@
                   (catch Throwable e
                     (error e))))
               ;; there is no event handler for this event, wrap them as :dead-event
-              ;; user code can register a handler for :dead-event to see if there is
-              ;; there is any event without event-handler
+              ;; user code can register a handler for :dead-event to see whether there is
+              ;; any event without event-handler
               (post! eventbus :dead-event {:event-name event-name :event event-obj})))))
       (finally
        (.set ^ThreadLocal (:dispatching? eventbus) false)))))
