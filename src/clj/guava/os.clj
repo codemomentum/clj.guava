@@ -54,7 +54,7 @@
 
 (defn gc
   "Runs the garbage collector,the same with System.gc() in java."
-  {:added "0.1" :static true}
+  {:added "0.1"}
   []
   (System/gc))
 
