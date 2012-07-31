@@ -70,7 +70,7 @@
 
 (defn thread-dump
   "Dump current thread or specific thread stacks as an string sequence."
-  {:added 0.1 :tag clojure.lang.ISeq}
+  {:added "0.1" :tag clojure.lang.ISeq}
   ([]
      (thread-dump (Thread/currentThread)))
   ([^Thread thread]
@@ -78,6 +78,7 @@
 
 (defn exit
   "Terminates the currently running Java Virtual Machine with status,default status is zero."
+  {:added "0.1" :test "are u sure want to test this function?"}
   ([]
      (exit 0))
   ([status]
