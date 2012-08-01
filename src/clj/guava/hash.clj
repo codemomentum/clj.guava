@@ -14,8 +14,8 @@
               :sha512 (Hashing/sha512)
               :good-fast-hash (Hashing/goodFastHash 32)})
 
-(def ^:dynamic ^{:added "0.1" :doc "seed for :murmur3_128 and :murmur3_32"} *sed* 0)
-(def ^:dynamic ^{:added "0.1" :doc "minimumBits for :good-fast-hash"} *min-bits* 32)
+(def ^{:added "0.1" :dynamic true :doc "seed for :murmur3_128 and :murmur3_32"} *sed* 0)
+(def ^{:added "0.1" :dynamic true :doc "minimumBits for :good-fast-hash"} *min-bits* 32)
 
 (defn hash
   "Generates a hash number according to the algorithm specified and the input data provided.
