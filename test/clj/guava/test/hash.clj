@@ -11,7 +11,8 @@
     (.putDouble hasher 2.5)
     (.putChar hasher \a)
     (.putString hasher ":object")
-    (is (= (-> hasher .hash Hashing/padToLong) (h/hash algo "james" 25 2.5 \a :object)))))
+    (.putObject hasher {:name "rose" :children {:jack :tom}} h/CLOJURE-FUNNEL)
+    (is (= (-> hasher .hash Hashing/padToLong) (h/hash algo "james" 25 2.5 \a :object {:name "rose" :children {:jack :tom}})))))
 
 (deftest test-hash
   (test-hash-helper :md5)

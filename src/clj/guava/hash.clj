@@ -16,6 +16,21 @@
 
 (def ^{:added "0.1" :dynamic true :doc "seed for :murmur3_128 and :murmur3_32"} *sed* 0)
 (def ^{:added "0.1" :dynamic true :doc "minimumBits for :good-fast-hash"} *min-bits* 32)
+(def ^{:added "0.1" :doc "Funnel used to handle clojure simple structures"}
+  CLOJURE-FUNNEL
+  (reify Funnel
+    (^void funnel [this from ^PrimitiveSink into]
+      (doseq [value (vals from)]
+        (cond
+         (string? value) (.putString into value)
+         (char? value) (.putChar into value)
+         (instance? Boolean value) (.putBoolean into value)
+         (instance? Double value) (.putDouble into value)
+         (instance? Float value) (.putFloat into value)
+         (instance? Long value) (.putLong into value)
+         (instance? Integer value) (.putInt into value)
+         (instance? Short value) (.putShort into value)
+         (instance? Byte value) (.putByte into value))))))
 
 (defn hash
   "Generates a hash number according to the algorithm specified and the input data provided.
@@ -50,39 +65,27 @@
         ^Hasher hasher (.newHasher hf)]
     (doseq [x xs]
       (cond
-       (instance? Byte x) (.putByte hasher x)
-       (instance? Short x) (.putShort hasher x)
-       (instance? Integer x) (.putInt hasher x)
-       (instance? Long x) (.putLong hasher x)
-       (instance? Float x) (.putFloat hasher x)
-       (instance? Double x) (.putDouble hasher x)
-       (instance? Boolean x) (.putBoolean hasher x)
-       (char? x) (.putChar hasher x)
-       (string? x) (.putString hasher x)
-       (keyword? x) (.putString hasher (str x))
-       :else (.putObject hasher x)))
+       (instance? Byte x) (.putByte hasher ^Byte x)
+       (instance? Short x) (.putShort hasher ^Short x)
+       (instance? Integer x) (.putInt hasher ^Integer x)
+       (instance? Long x) (.putLong hasher ^Long x)
+       (instance? Float x) (.putFloat hasher ^Float x)
+       (instance? Double x) (.putDouble hasher ^Double x)
+       (instance? Boolean x) (.putBoolean hasher ^Boolean x)
+       (char? x) (.putChar hasher ^Character x)
+       (string? x) (.putString hasher ^String x)
+       (instance? clojure.lang.IPersistentMap x) (.putObject hasher ^Object x CLOJURE-FUNNEL)
+       ;; For other types, just use its string representation
+       :else (.putString hasher (str x))))
     (-> hasher .hash Hashing/padToLong)))
 
 (defn bloom-filter 
   "Creates a bloom filter with the expected insertion number and false positive probability.
 
-  The data which are expected to be put into includes usual map and record."
+  The data which are expected to be put into includes usual map and record -- we support nested map/record."
   {:added "0.1" :tag BloomFilter}
   [expected-insertions false-positive-probability]
-  (let [^Funnel funnel (reify Funnel
-                         (^void funnel [this from ^PrimitiveSink into]
-                           (doseq [value (vals from)]
-                             (cond
-                              (string? value) (.putString into value)
-                              (char? value) (.putChar into value)
-                              (instance? Boolean value) (.putBoolean into value)
-                              (instance? Double value) (.putDouble into value)
-                              (instance? Float value) (.putFloat into value)
-                              (instance? Long value) (.putLong into value)
-                              (instance? Integer value) (.putInt into value)
-                              (instance? Short value) (.putShort into value)
-                              (instance? Byte value) (.putByte into value)))))]
-    (BloomFilter/create funnel expected-insertions false-positive-probability)))
+  (BloomFilter/create CLOJURE-FUNNEL expected-insertions false-positive-probability))
 
 (defn bloom-filter-put!
   "Puts data into bloom filter"
