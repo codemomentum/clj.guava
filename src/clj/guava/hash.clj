@@ -21,8 +21,8 @@
   "Generates a hash number according to the algorithm specified and the input data provided.
 
    Usage:
-     (hash :md5  :james 25)    => 2424085208407
-     (hash :sha256 :james 25) => 834506830458608356
+     (hash :md5  :james 25)    => -8648192032652653463
+     (hash :sha256 :james 25)  => -6742704120543053434
 
    The following hash algorithm are supported:
      - :md5
