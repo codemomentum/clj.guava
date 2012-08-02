@@ -87,17 +87,16 @@
   [expected-insertions false-positive-probability]
   (BloomFilter/create CLOJURE-FUNNEL expected-insertions false-positive-probability))
 
-(defn bloom-filter-put!
+(defn bloom-put!
   "Puts data into bloom filter"
   {:added "0.1"}
   [^BloomFilter bloom-filter x]
   (.put bloom-filter x))
 
-(defn bloom-filter-contains?
+(defn bloom-contains?
   "Checks whether a specified value is in the bloom-filter, if
    the return is false, then the value is absolutely NOT in the filter.
-   but if the return value is true, it means MAYBE in the filter. For the
-   posibility of the 'MAYBE', try the false-positive-probability function."
+   but if the return value is true, it means MAYBE in the filter. "
   {:added "0.1" :tag boolean}
   [^BloomFilter bloom-filter x]
   (.mightContain bloom-filter x))

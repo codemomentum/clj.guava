@@ -67,13 +67,13 @@
 (deftest test-bloom-filter
   (let [bf (h/bloom-filter 100 0.01)
         rose (Person. "rose" 30)]
-    (h/bloom-filter-put! bf {:name "james" :age 25})
-    (h/bloom-filter-put! bf {:name "jack" :age 30})
-    (h/bloom-filter-put! bf rose)
-    (is (h/bloom-filter-contains? bf {:name "james" :age 25}))
-    (is (h/bloom-filter-contains? bf {:name "jack" :age 30}))
-    (is (h/bloom-filter-contains? bf rose))
-    (is (= false (h/bloom-filter-contains? bf {:name "jamie" :age 25})))))
+    (h/bloom-put! bf {:name "james" :age 25})
+    (h/bloom-put! bf {:name "jack" :age 30})
+    (h/bloom-put! bf rose)
+    (is (h/bloom-contains? bf {:name "james" :age 25}))
+    (is (h/bloom-contains? bf {:name "jack" :age 30}))
+    (is (h/bloom-contains? bf rose))
+    (is (= false (h/bloom-contains? bf {:name "jamie" :age 25})))))
 
 (deftest test-consistent-hash
   (is (= (Hashing/consistentHash 100 10) (h/consistent-hash 100 10))))
