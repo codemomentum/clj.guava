@@ -14,7 +14,7 @@
               :sha512 (Hashing/sha512)
               :good-fast-hash (Hashing/goodFastHash 32)})
 
-(def ^{:added "0.1" :dynamic true :doc "seed for :murmur3_128 and :murmur3_32"} *sed* 0)
+(def ^{:added "0.1" :dynamic true :doc "seed for :murmur3_128 and :murmur3_32"} *seed* 0)
 (def ^{:added "0.1" :dynamic true :doc "minimumBits for :good-fast-hash"} *min-bits* 32)
 (def ^{:added "0.1" :doc "Funnel used to handle clojure simple structures"}
   CLOJURE-FUNNEL
@@ -48,7 +48,7 @@
      - :sha512
      - :good-fast-hash
 
-  For :murmur3-32 and :murmur3-128, you can pass a dynamic var: *sed* to change the default sed(default 0).
+  For :murmur3-32 and :murmur3-128, you can pass a dynamic var: *seed* to change the default seed(default 0).
   For :good-fast-hash you can pass in a *min-bits* to specify the minimum bits of hash(default 32)"
   {:added "0.1" :tag long}
   [algorithm & xs]
@@ -58,9 +58,9 @@
                           (and (= :good-fast-hash algorithm)
                                (thread-bound? #'*min-bits*)) (Hashing/goodFastHash *min-bits*)
                           (and (contains? #{:murmur3-32 :murmur3-128} algorithm)
-                               (thread-bound? #'*sed*)) (if (= :murmur3-128 algorithm)
-                                                          (Hashing/murmur3-128 *sed*)
-                                                          (Hashing/murmur3-32 *sed*))
+                               (thread-bound? #'*seed*)) (if (= :murmur3-128 algorithm)
+                                                          (Hashing/murmur3-128 *seed*)
+                                                          (Hashing/murmur3-32 *seed*))
                           :else (ALGORITHMS algorithm))
         ^Hasher hasher (.newHasher hf)]
     (doseq [x xs]

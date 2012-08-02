@@ -23,7 +23,7 @@
   (test-hash-helper :sha512)
   (test-hash-helper :good-fast-hash))
 
-(deftest test-murmur3-32-with-sed
+(deftest test-murmur3-32-with-seed
   (let [^HashFunction hf (Hashing/murmur3_32 100)
         ^Hasher hasher (.newHasher hf)]
     (.putString hasher "james")
@@ -31,7 +31,7 @@
     (.putDouble hasher 2.5)
     (.putChar hasher \a)
     (.putString hasher ":object")
-    (binding [h/*sed* 100]
+    (binding [h/*seed* 100]
       (is (= (-> hasher .hash Hashing/padToLong) (h/hash :murmur3-32 "james" 25 2.5 \a :object))))))
 
 (deftest test-murmur3-128-with-sed
@@ -42,7 +42,7 @@
     (.putDouble hasher 2.5)
     (.putChar hasher \a)
     (.putString hasher ":object")
-    (binding [h/*sed* 100]
+    (binding [h/*seed* 100]
       (is (= (-> hasher .hash Hashing/padToLong) (h/hash :murmur3-128 "james" 25 2.5 \a :object))))))
 
 (deftest test-good-fast-hash-with-min-bits
