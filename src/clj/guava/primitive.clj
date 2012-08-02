@@ -9,7 +9,10 @@
 
 ;(set! *warn-on-reflection* true)
 
-; length in bytes
+; ====================================
+; length of primitive types in bytes
+; ====================================
+
 (def ^:const ^{:tag Integer :added "0.1"}
   byte-bytes (int 1))
 
@@ -28,6 +31,10 @@
 (def ^:const ^{:tag Integer :added "0.1"}
   long-bytes Longs/BYTES)
 
+; ====================================
+; judge if a double/float is finite
+; ====================================
+
 (defn finite-double?
   "Return true if a double is neither Infinity nor NaN"
   ^{:tag Boolean :added "0.1"}
@@ -41,7 +48,11 @@
   [arg]
   (Doubles/isFinite arg))
 
+
+; ====================================
 ; transform between primitives and byte array
+; ====================================
+
 (defn bytes->char
   "Parse a char from byte array representation"
   ^{:tag Character :added "0.1"}
@@ -86,3 +97,79 @@
   [bytes]
   (Longs/fromByteArray bytes))
 
+; ====================================
+; UnSingedInteger constructors
+; ====================================
+
+(defprotocol uint-constructor
+  (uint [a] [a b]))
+
+(extend-protocol uint-constructor Integer
+  (uint [arg]
+    (UnsignedInteger/asUnsigned arg)))
+
+(extend-protocol uint-constructor Long
+  (uint [arg]
+    (UnsignedInteger/valueOf (int arg))))
+
+(extend-protocol uint-constructor String
+  (uint
+    ([arg] (UnsignedInteger/valueOf arg))
+    ([arg base] (UnsignedInteger/valueOf arg base))))
+
+(extend-protocol uint-constructor BigInteger
+  (uint [arg]
+    (UnsignedInteger/valueOf arg)))
+
+(extend-protocol uint-constructor clojure.lang.BigInt
+  (uint [arg]
+    (UnsignedInteger/valueOf (biginteger arg))))
+
+; ====================================
+; UnSingedLong constructors
+; ====================================
+
+(defprotocol ulong-constructor
+  (ulong [a] [a b]))
+
+(extend-protocol ulong-constructor Integer
+  (ulong [arg]
+    (UnsignedLong/asUnsigned (long arg))))
+
+(extend-protocol ulong-constructor Long
+  (ulong [arg]
+    (UnsignedLong/asUnsigned arg)))
+
+(extend-protocol ulong-constructor String
+  (ulong
+    ([arg] (UnsignedLong/valueOf arg))
+    ([arg base] (UnsignedLong/valueOf arg base))))
+
+(extend-protocol ulong-constructor BigInteger
+  (ulong [arg]
+    (UnsignedLong/valueOf arg)))
+
+(extend-protocol ulong-constructor clojure.lang.BigInt
+  (ulong [arg]
+    (UnsignedLong/valueOf (biginteger arg))))
+
+; ====================================
+; UnSingedInteger constructors
+; ====================================
+
+;(defprotocol unsined
+;  (+ [a b & more])
+;  (- [a b & more])
+;  (* [a b & more])
+;  (/ [a b & more])
+;  (< [a b & more])
+;  (> [a b & more])
+;  (<= [a b & more])
+;  (>= [a b & more]) 
+;  (= [a b & more])
+;  (== [a b & more])
+;  (mod [a b])
+;  )
+;
+;(defn the-fn [a]
+;  (str a))

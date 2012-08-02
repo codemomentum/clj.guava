@@ -1,6 +1,11 @@
 (ns clj.guava.test.primitive
   (:require [clj.guava.primitive :refer :all ])
-  (:require [clojure.test :refer :all ]))
+  (:require [clojure.test :refer :all ])
+  (:import [com.google.common.primitives
+            Bytes SignedBytes UnsignedBytes
+            Ints UnsignedInteger UnsignedInts
+            Longs UnsignedLong UnsignedLongs
+            Floats Doubles Chars Booleans Shorts]))
 
 (deftest test-primitive-bytes
   (testing "length in bytes of primitve types"
@@ -31,14 +36,30 @@
     ))
 
 (deftest char-bytes-transform
-  (testing "transforming between char and byte array"
-    (for [k (range 0 256)]
+  (testing "transforming between char/int/long and byte array"
+    (doseq [k (range 0 256)]
       (is (= (char k) (bytes->char (char->bytes (char k))))))
-    (for [k (range -2560 2560)]
+    (doseq [k (range -2560 2560)]
       (is (= (int k) (bytes->int (int->bytes (int k))))))
-    (for [k (range -256000 256000)]
+    (doseq [k (range -2560 2560)]
       (is (= k (bytes->long (long->bytes k)))))
-    (for [k (range -256000 256000)]
+    (doseq [k (range -2560 2560)]
       (is (= (short k) (bytes->short (short->bytes (short k))))))
+    ;    (doseq [k (range 0 2)]
+    ;      (is (true? true)))
 
+    ))
+
+(deftest uint-constructors
+  (testing "generate uint by diffrent constructors"
+    (doseq [n [1238 (int 1238) "1238" (bigint 1238) (biginteger 1238)]]
+      (is (instance? UnsignedInteger (uint n)))
+      (is (= "1238" (str n))))
+    ))
+
+(deftest uint-constructors
+  (testing "generate ulong by diffrent constructors"
+    (doseq [n [1238 (int 1238) "1238" (bigint 1238) (biginteger 1238)]]
+      (is (instance? UnsignedLong (ulong n)))
+      (is (= "1238" (str n))))
     ))
