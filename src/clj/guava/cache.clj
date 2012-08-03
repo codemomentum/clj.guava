@@ -92,7 +92,18 @@
                       (loader key))))))
 
 (defn get
-  "Gets a value for the specified key."
+  "Gets a value for the specified key.
+
+   You can also optionally pass in a loader function, then if
+   the key is not cache, the loader-function will be used to
+   load the key, this implemented the:
+      'if cached, return; otherwise create, cache and return'
+   pattern.
+
+    e.g.
+      (get cache :my-big-data (fn [key]
+                                 ;; your logic to get the big data
+                                 ))"
   {:added "0.1"}
   ([^LoadingCache cache key]
      (.get cache key))
