@@ -7,7 +7,7 @@
             Longs UnsignedLong UnsignedLongs
             Floats Doubles Chars Booleans Shorts]))
 
-;(set! *warn-on-reflection* true)
+(set! *warn-on-reflection* true)
 
 ; ====================================
 ; length of primitive types in bytes
@@ -60,6 +60,7 @@
   (Chars/fromByteArray bytes))
 
 (defn char->bytes
+  "Convert a char to bytes array"
   ^{:tag bytes :added "0.1"}
   [c]
   (Chars/toByteArray c))
@@ -71,11 +72,13 @@
   (Ints/fromByteArray bytes))
 
 (defn int->bytes
+  "Convert a int to bytes array"
   ^{:tag bytes :added "0.1"}
   [n]
   (Ints/toByteArray n))
 
 (defn short->bytes
+  "Convert a short to bytes array"
   ^{:tag Short :added "0.1"}
   [s]
   (Shorts/toByteArray s))
@@ -87,6 +90,7 @@
   (Shorts/fromByteArray bytes))
 
 (defn long->bytes
+  "Convert long int to bytes array"
   ^{:tag bytes :added "0.1"}
   [l]
   (Longs/toByteArray l))
@@ -154,22 +158,38 @@
     (UnsignedLong/valueOf (biginteger arg))))
 
 ; ====================================
-; UnSingedInteger constructors
+; Operations on unsigned int/long
 ; ====================================
-
-;(defprotocol unsined
-;  (+ [a b & more])
-;  (- [a b & more])
-;  (* [a b & more])
-;  (/ [a b & more])
-;  (< [a b & more])
-;  (> [a b & more])
-;  (<= [a b & more])
-;  (>= [a b & more]) 
-;  (= [a b & more])
-;  (== [a b & more])
+;
+;(defprotocol unsigned
+;  (+ [a] [a b] [a b & more])
+;  (- [a] [a b] [a b & more]) ;; TOOD why there's reflaction warning here??
+;  (* [a] [a b] [a b & more])
+;  (/ [a] [a b] [a b & more])
+;  (< [a] [a b] [a b & more])
+;  (> [a] [a b] [a b & more])
+;  (<= [a] [a b] [a b & more])
+;  (>= [a] [a b] [a b & more])
+;  (= [a] [a b] [a b & more])
+;  (== [a] [a b] [a b & more])
 ;  (mod [a b])
 ;  )
 ;
-;(defn the-fn [a]
-;  (str a))
+;(extend-protocol unsigned UnsignedInteger
+;  (+
+;    ([a] a)
+;    ([^UnsignedInteger a b] (.add a b))
+;    ([a b & more] (reduce + (+ a b) more)))
+;  (-
+;    ([a] (- (uint 0) a))
+;    ([^UnsignedInteger a b] (.subtract a b))
+;    ([a b & more] (reduce - (- a b) more))
+;    )
+;
+;  )
+
+
+
+; TODO meta
+; TODO comment
+; TODO tag
