@@ -2,7 +2,8 @@
       :author "xumingming"}
   clj.guava.cache
   (:import [com.google.common.cache LoadingCache RemovalListener CacheLoader
-            CacheBuilder Weigher RemovalNotification CacheStats RemovalCause])
+            CacheBuilder Weigher RemovalNotification CacheStats RemovalCause
+            Cache])
   (:import [java.util.concurrent TimeUnit]))
 
 (def ^{:added "0.1" :doc "time unit"}
@@ -24,6 +25,11 @@
   "Creates a cache with the specified loader.
 
   There are many options can be set on the cache:
+    :loader              the function used to auto-load the value when the
+                         key requested is not in the cache.
+                         If the loader is not specified, then when you get
+                         the key, you must provide the loader, and also the
+                         function refresh & get-all is not supported.
     :max-size            the max count of object can be put into the cache.
     :max-weight          max weight of the cache, this param must specified
                          together with :weigher which calculate the weight
@@ -58,9 +64,9 @@
         :expired
         :size
 "
-  {:added "0.1" :tag LoadingCache}
-  [loader & {:keys [max-size max-weight weigher expire-after-access expire-after-write removal-listener
-                    refresh-after-write ticker weak-keys weak-values soft-values]}]
+  {:added "0.1" :tag Cache}
+  [& {:keys [loader max-size max-weight weigher expire-after-access expire-after-write
+             removal-listener refresh-after-write ticker weak-keys weak-values soft-values]}]
   (let [^CacheBuilder builder (CacheBuilder/newBuilder)]
     (when max-size
       (.maximumSize builder max-size))
@@ -76,9 +82,9 @@
       (.expireAfterWrite builder (first expire-after-write) (TIME-UNTIS (second expire-after-write))))
     (when removal-listener
       (.removalListener builder (reify RemovalListener
-                                (^void onRemoval [this ^RemovalNotification notification]
-                                  (removal-listener (.getKey notification) (.getValue notification)
-                                                    (REMOVE-CAUSES (.getCause notification)))))))
+                                  (^void onRemoval [this ^RemovalNotification notification]
+                                    (removal-listener (.getKey notification) (.getValue notification)
+                                                      (REMOVE-CAUSES (.getCause notification)))))))
     (when ticker
       (.ticker builder ticker))
     (when weak-keys
@@ -87,9 +93,11 @@
       (.weakValues builder))
     (when soft-values
       (.softValues builder))
-    (.build builder (proxy [CacheLoader] []
-                    (load [key]
-                      (loader key))))))
+    (if loader
+      (.build builder (proxy [CacheLoader] []
+                        (load [key]
+                          (loader key))))
+      (.build builder))))
 
 (defn get
   "Gets a value for the specified key.
@@ -107,7 +115,7 @@
   {:added "0.1"}
   ([^LoadingCache cache key]
      (.get cache key))
-  ([^LoadingCache cache key loader]
+  ([^Cache cache key loader]
      (.get cache key loader)))
 
 (defn get-all
@@ -127,13 +135,13 @@
 (defn put!
   "Puts a key value pair into the cache."
   {:added "0.1"}
-  [^LoadingCache cache key value]
+  [^Cache cache key value]
   (.put cache key value))
 
 (defn as-map
   "Returns all the content in the cache as a map."
   {:added "0.1"}
-  [^LoadingCache cache]
+  [^Cache cache]
   (into {} (for [[key value] (.asMap cache)]
              [key value])))
 
@@ -141,7 +149,7 @@
   "Invalidates the specified keys in the cache, if the keys is not
   specified, then invalidate the entire cache."
   {:added "0.1"}
-  [^LoadingCache cache & keys]
+  [^Cache cache & keys]
   (if keys
     (.invalidateAll cache ^Iterable keys)
     (.invalidateAll cache)))
@@ -156,13 +164,13 @@
   operations if writes are rare. So if you want to manually cleanup
   the cache, you can call this function."
   ^{:added "0.1"}
-  [^LoadingCache cache]
+  [^Cache cache]
   (.cleanUp cache))
 
 (defn stats
   "Returns the stats for the cache"
   {:added "0.1"}
-  [^LoadingCache cache]
+  [^Cache cache]
   (let [^CacheStats cs (.stats cache)]
     {:hit-cnt (.hitCount cs)
      :request-cnt (.requestCount cs)
