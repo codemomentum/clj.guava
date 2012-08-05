@@ -7,43 +7,40 @@
             Longs UnsignedLong UnsignedLongs
             Floats Doubles Chars Booleans Shorts]))
 
-(set! *warn-on-reflection* true)
-
 ; ====================================
 ; length of primitive types in bytes
 ; ====================================
 
-(def ^:const ^{:tag Integer :added "0.1"}
+(def ^{:doc "Length of a Byte in byte"
+       :tag Integer :added "0.1" :const true}
   byte-bytes (int 1))
 
-(def ^:const ^{:tag Integer :added "0.1"}
+(def ^{:doc "Length of a Char in byte"
+       :tag Integer :added "0.1" :const true}
   char-bytes Chars/BYTES)
 
-(def ^:const ^{:tag Integer :added "0.1"}
+(def ^{:doc "Length of a Integer in byte"
+       :tag Integer :added "0.1" :const true}
   int-bytes Ints/BYTES)
 
-(def ^:const ^{:tag Integer :added "0.1"}
+(def ^{:doc "Length of a Float in byte"
+       :tag Integer :added "0.1" :const true}
   float-bytes Floats/BYTES)
 
-(def ^:const ^{:tag Integer :added "0.1"}
+(def ^{:doc "Length of a Double in byte"
+       :tag Integer :added "0.1" :const true}
   double-bytes Doubles/BYTES)
 
-(def ^:const ^{:tag Integer :added "0.1"}
+(def ^{:doc "Length of a Long in byte"
+       :tag Integer :added "0.1" :const true}
   long-bytes Longs/BYTES)
 
 ; ====================================
 ; judge if a double/float is finite
 ; ====================================
 
-(defn finite-double?
-  "Return true if a double is neither Infinity nor NaN"
-  ^{:tag Boolean :added "0.1"}
-  [arg]
-  (Doubles/isFinite arg))
-
-; use Doubles here! Because clojure's / operator convert float Infinity into double!
-(defn finite-float?
-  "Return true if a float is neither Infinity nor NaN"
+(defn finite?
+  "Return true if a double/float is neither Infinity nor NaN"
   ^{:tag Boolean :added "0.1"}
   [arg]
   (Doubles/isFinite arg))
@@ -102,10 +99,11 @@
   (Longs/fromByteArray bytes))
 
 ; ====================================
-; UnSingedInteger constructors
+; UnSignedInteger constructors
 ; ====================================
 
 (defprotocol uint-constructor
+  "Use function 'uint' to construct an unsigned integer"
   (uint [a] [a b]))
 
 (extend-protocol uint-constructor Integer
@@ -130,10 +128,11 @@
     (UnsignedInteger/valueOf (biginteger arg))))
 
 ; ====================================
-; UnSingedLong constructors
+; UnSignedLong constructors
 ; ====================================
 
 (defprotocol ulong-constructor
+  "Use function 'ulong' to construct an unsigned long"
   (ulong [a] [a b]))
 
 (extend-protocol ulong-constructor Integer
@@ -187,9 +186,3 @@
 ;    )
 ;
 ;  )
-
-
-
-; TODO meta
-; TODO comment
-; TODO tag

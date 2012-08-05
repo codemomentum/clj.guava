@@ -19,20 +19,20 @@
 
 (deftest test-finite-double
   (testing "test is-finite of double"
-    (is (false? (finite-double? Double/NaN)) "Nan is NOT finite")
-    (is (false? (finite-double? (/ 1.0 0.0))) "Infinit is NOT finite")
-    (is (true? (finite-double? 1.0)) "1.0 is finite")
-    (is (true? (finite-double? Double/MAX_VALUE)) "1.0 is finite")
-    (is (true? (finite-double? Double/MIN_VALUE)) "1.0 is finite")
+    (is (false? (finite? Double/NaN)) "Nan is NOT finite")
+    (is (false? (finite? (/ 1.0 0.0))) "Infinit is NOT finite")
+    (is (true? (finite? 1.0)) "1.0 is finite")
+    (is (true? (finite? Double/MAX_VALUE)) "1.0 is finite")
+    (is (true? (finite? Double/MIN_VALUE)) "1.0 is finite")
     ))
 
 (deftest test-finite-float
   (testing "test is-finite of float"
-    (is (false? (finite-float? Float/NaN)) "Nan is NOT finite")
-    (is (false? (finite-float? (/ (float 1.0) (float 0.0)))) "Infinit is NOT finite")
-    (is (true? (finite-float? (float 1.0))) "1.0 is finite")
-    (is (true? (finite-float? Float/MAX_VALUE)) "1.0 is finite")
-    (is (true? (finite-float? Float/MIN_VALUE)) "1.0 is finite")
+    (is (false? (finite? Float/NaN)) "Nan is NOT finite")
+    (is (false? (finite? (/ (float 1.0) (float 0.0)))) "Infinit is NOT finite")
+    (is (true? (finite? (float 1.0))) "1.0 is finite")
+    (is (true? (finite? Float/MAX_VALUE)) "1.0 is finite")
+    (is (true? (finite? Float/MIN_VALUE)) "1.0 is finite")
     ))
 
 (deftest char-bytes-transform
