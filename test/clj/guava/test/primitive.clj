@@ -1,5 +1,7 @@
 (ns clj.guava.test.primitive
-  (:require [clj.guava.primitive :refer :all ])
+  (:require [clj.guava.primitive.basic :refer :all ])
+  (:require [clj.guava.primitive.uint :refer :all ])
+  (:require [clj.guava.primitive.ulong :refer :all ])
   (:require [clojure.test :refer :all ])
   (:import [com.google.common.primitives
             Bytes SignedBytes UnsignedBytes
