@@ -21,17 +21,14 @@
     (let [a (ulong 9834)
           b (ulong 823)
           c (ulong 9275038)
-          res1 (+)
-          res2 (+ a)
-          res3 (+ a b)
-          res4 (+ a b c)]
+          res1 (+ a)
+          res2 (+ a b)
+          res3 (+ a b c)]
       (is (instance? UnsignedLong res1))
-      (is (= 0 res1))
+      (is (= 9834 res1))
       (is (instance? UnsignedLong res2))
-      (is (= 9834 res2))
+      (is (= 10657 res2))
       (is (instance? UnsignedLong res3))
-      (is (= 10657 res3))
-      (is (instance? UnsignedLong res4))
-      (is (= 9285695 res4))))
+      (is (= 9285695 res3))))
 
   )

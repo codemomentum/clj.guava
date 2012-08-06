@@ -21,17 +21,14 @@
     (let [a (uint 9834)
           b (uint 823)
           c (uint 9275038)
-          res1 (+)
-          res2 (+ a)
-          res3 (+ a b)
-          res4 (+ a b c)]
+          res1 (+ a)
+          res2 (+ a b)
+          res3 (+ a b c)]
       (is (instance? UnsignedInteger res1))
-      (is (= 0 res1))
+      (is (= 9834 res1))
       (is (instance? UnsignedInteger res2))
-      (is (= 9834 res2))
+      (is (= 10657 res2))
       (is (instance? UnsignedInteger res3))
-      (is (= 10657 res3))
-      (is (instance? UnsignedInteger res4))
-      (is (= 9285695 res4))))
+      (is (= 9285695 res3))))
 
   )

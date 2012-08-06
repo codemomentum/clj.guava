@@ -31,9 +31,47 @@
   (ulong [arg]
     (UnsignedLong/valueOf (biginteger arg))))
 
+
 (defn +
-  ""
-  ([] (ulong 0))
+  "Override the + operaton"
+  ^{:tag UnsignedLong :added "0.1"}
   ([a] a)
-  ([^UnsignedLong a ^UnsignedLong b] (.add a b))
+  ([^UnsignedLong a b] (.add a b))
   ([a b & more] (reduce + (+ a b) more)))
+
+(defn -
+  "Override the - operaton"
+  ^{:tag UnsignedLong :added "0.1"}
+  ([a] (- (ulong 0) a))
+  ([^UnsignedLong a b] (.subtract a b))
+  ([a b & more] (reduce - (- a b) more)))
+
+(defn *
+  "Override the * operation"
+  ^{:tag UnsignedLong :added "0.1"}
+  ([a] a)
+  ([^UnsignedLong a b] (.multiply a b))
+  ([a b & more] (reduce * (* a b) more)))
+
+(defn /
+  "Override the / operation"
+  ^{:tag UnsignedLong :added "0.1"}
+  ([a] (/ (ulong 1) a))
+  ([^UnsignedLong a b] (.divide a b))
+  ([a b & more] (reduce / (/ a b) more)))
+
+(defn mod
+  "Override the mod operation"
+  ^{:tag UnsignedLong :added "0.1"}
+  [^UnsignedLong a b] (.remainder a b))
+
+(defn rem
+  "Override the rem operation"
+  ^{:tag UnsignedLong :added "0.1"}
+  [a b]
+  (mod a b))
+
+
+; There's no need to override <, >, <=, >=, =, ==, 
+; because clojure support comparing between java.lang.Number
+; and both UnsignedInteger and UnsignedLong extends java.lang.Number
