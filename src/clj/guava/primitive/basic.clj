@@ -95,5 +95,3 @@
   ^{:tag Long :added "0.1"}
   [bytes]
   (Longs/fromByteArray bytes))
-
-

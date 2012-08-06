@@ -30,3 +30,11 @@
 (extend-protocol uint-constructor clojure.lang.BigInt
   (uint [arg]
     (UnsignedInteger/valueOf (biginteger arg))))
+
+(defn + 
+  ""
+  ([] (uint 0))
+  ([a] a)
+  ([^UnsignedInteger a ^UnsignedInteger b] (.add a b))
+  ([a b & more] (reduce + (+ a b) more)))
+

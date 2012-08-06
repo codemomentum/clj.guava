@@ -1,7 +1,5 @@
-(ns clj.guava.test.primitive
+(ns clj.guava.test.primitive.basic
   (:require [clj.guava.primitive.basic :refer :all ])
-  (:require [clj.guava.primitive.uint :refer :all ])
-  (:require [clj.guava.primitive.ulong :refer :all ])
   (:require [clojure.test :refer :all ])
   (:import [com.google.common.primitives
             Bytes SignedBytes UnsignedBytes
@@ -52,16 +50,3 @@
 
     ))
 
-(deftest uint-constructors
-  (testing "generate uint by diffrent constructors"
-    (doseq [n [1238 (int 1238) "1238" (bigint 1238) (biginteger 1238)]]
-      (is (instance? UnsignedInteger (uint n)))
-      (is (= "1238" (str n))))
-    ))
-
-(deftest uint-constructors
-  (testing "generate ulong by diffrent constructors"
-    (doseq [n [1238 (int 1238) "1238" (bigint 1238) (biginteger 1238)]]
-      (is (instance? UnsignedLong (ulong n)))
-      (is (= "1238" (str n))))
-    ))

@@ -30,3 +30,10 @@
 (extend-protocol ulong-constructor clojure.lang.BigInt
   (ulong [arg]
     (UnsignedLong/valueOf (biginteger arg))))
+
+(defn +
+  ""
+  ([] (ulong 0))
+  ([a] a)
+  ([^UnsignedLong a ^UnsignedLong b] (.add a b))
+  ([a b & more] (reduce + (+ a b) more)))
