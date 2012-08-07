@@ -7,28 +7,39 @@
 ; ====================================
 
 (defprotocol uint-constructor
-  "Use function 'uint' to construct an unsigned integer"
+  "Use function 'uint' to construct an unsigned integer
+  Usage: (uint 123) or (uint (int 123)) or (uint \"123\") (uint \"127\" 8)"
+  ^{:added "0.1"}
   (uint [a] [a b]))
 
 (extend-protocol uint-constructor Integer
-  (uint [arg]
+  (uint
+    [arg]
+    ^{:tag UnsignedInteger :added "0.1"}
     (UnsignedInteger/asUnsigned arg)))
 
 (extend-protocol uint-constructor Long
   (uint [arg]
+    ^{:tag UnsignedInteger :added "0.1"}
     (UnsignedInteger/valueOf (int arg))))
 
 (extend-protocol uint-constructor String
   (uint
-    ([arg] (UnsignedInteger/valueOf arg))
-    ([arg base] (UnsignedInteger/valueOf arg base))))
+    ([arg]
+      ^{:tag UnsignedInteger :added "0.1"}
+      (UnsignedInteger/valueOf arg))
+    ([arg base]
+      ^{:tag UnsignedInteger :added "0.1"}
+      (UnsignedInteger/valueOf arg base))))
 
 (extend-protocol uint-constructor BigInteger
   (uint [arg]
+    ^{:tag UnsignedInteger :added "0.1"}
     (UnsignedInteger/valueOf arg)))
 
 (extend-protocol uint-constructor clojure.lang.BigInt
   (uint [arg]
+    ^{:tag UnsignedInteger :added "0.1"}
     (UnsignedInteger/valueOf (biginteger arg))))
 
 (defn +

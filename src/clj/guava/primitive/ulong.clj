@@ -8,27 +8,36 @@
 
 (defprotocol ulong-constructor
   "Use function 'ulong' to construct an unsigned long"
+  ^{:added "0.1"}
   (ulong [a] [a b]))
 
 (extend-protocol ulong-constructor Integer
   (ulong [arg]
+    ^{:tag UnsignedLong :added "0.1"}
     (UnsignedLong/asUnsigned (long arg))))
 
 (extend-protocol ulong-constructor Long
   (ulong [arg]
+    ^{:tag UnsignedLong :added "0.1"}
     (UnsignedLong/asUnsigned arg)))
 
 (extend-protocol ulong-constructor String
   (ulong
-    ([arg] (UnsignedLong/valueOf arg))
-    ([arg base] (UnsignedLong/valueOf arg base))))
+    ([arg]
+      ^{:tag UnsignedLong :added "0.1"}
+      (UnsignedLong/valueOf arg))
+    ([arg base]
+      ^{:tag UnsignedLong :added "0.1"}
+      (UnsignedLong/valueOf arg base))))
 
 (extend-protocol ulong-constructor BigInteger
   (ulong [arg]
+    ^{:tag UnsignedLong :added "0.1"}
     (UnsignedLong/valueOf arg)))
 
 (extend-protocol ulong-constructor clojure.lang.BigInt
   (ulong [arg]
+    ^{:tag UnsignedLong :added "0.1"}
     (UnsignedLong/valueOf (biginteger arg))))
 
 
