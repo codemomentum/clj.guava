@@ -79,3 +79,8 @@
     (is (= "hello -rld" (collapse cm1 "hello WOrld" "-")))
     )
   )
+
+(deftest test-conv
+  (is (= "lower_camel" (conv LOWER-CAMEL LOWER-UNDERSCORE "lowerCamel")))
+  (is (= "LowerCamel" (conv LOWER-CAMEL UPPER-CAMEL "lowerCamel")))
+  (is (= "upper-underscore") (conv UPPER-UNDERSCORE LOWER-HYPHEN "UPPER_UNDERSCORE")))

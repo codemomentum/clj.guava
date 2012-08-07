@@ -2,7 +2,7 @@
       :author "dennis zhuang<killme2008@gmail.com>"}
   clj.guava.string
   (:refer-clojure :exclude [range and or count replace remove])
-  (:import [com.google.common.base Joiner Splitter CharMatcher Charsets Strings]))
+  (:import [com.google.common.base Joiner Splitter CharMatcher Charsets Strings CaseFormat]))
 
 (defn- ^String ->str [s ^String msg]
   (if s
@@ -225,14 +225,14 @@
 
 
 ;;CharMatcher creation and manipulation
-(defn- guava-char-macher-name [^String name]
+(defn- guava-constant-name [^String name]
   (.replace (.toUpperCase name) "_" "-"))
 
 ;; define clojure constants for every CharMacher constants
 (doseq [^java.lang.reflect.Field f (seq (.getFields CharMatcher))]
   (let [name (.getName f)
         doc (format "CharMatcher/%s" name)
-        new-name (guava-char-macher-name name)]
+        new-name (guava-constant-name name)]
     (eval
      `(def ~(symbol new-name) (. CharMatcher ~(symbol name))))))
 
@@ -364,3 +364,15 @@
   [^CharMatcher cm ^CharSequence s]
   (.trimTrailingFrom cm s))
 
+
+(doseq [cf (seq (CaseFormat/values))]
+  (let [name (.name cf)
+        new-name (guava-constant-name name)]
+    (eval
+     `(def ~(symbol new-name) ~cf))))
+
+(defn conv
+  "Converts the specified String s from the source format to the specified format."
+  {:added "0.1" :tag String}
+  [^CaseFormat source-cf ^CaseFormat target-cf ^String s]
+  (.to source-cf target-cf s))
