@@ -261,7 +261,6 @@
 
 (defmacro ranges
   "Create a integers or characters range,for example:
-      (ranges)          Returns a unbound range;
       (ranges 0)        Returns a range that contains only the given value 0;
       (ranges .. 0)     Returns a range that contains all values less than or equal to 0;
       (ranges ... 0)    Returns a range that contains all values strictly less than 0;
@@ -324,7 +323,7 @@
   [^Range r]
   {:type (BOUND-TYPES (.lowerBoundType r)) :value (.lowerEndpoint r)})
 
-(defn lower-bound
+(defn upper-bound
   "Returns the upper endpoint and type of the range"
   {:added "0.1" :tag clojure.lang.IPersistentMap}
   [^Range r]
