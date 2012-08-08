@@ -1,9 +1,9 @@
 (ns clj.guava.collect
-  (:refer-clojure :exclude [sort max min reverse])
+  (:refer-clojure :exclude [sort max min reverse empty?])
   (:import [com.google.common.base Function]
-           [com.google.common.collect ImmutableMultiset]
+           [com.google.common.collect ImmutableMultiset Ranges Range DiscreteDomains DiscreteDomain BoundType]
            [com.google.common.collect Ordering])
-  (:use [clj.guava.base :only [var-ns check-not-nil]]))
+  (:use [clj.guava.base :only [var-ns check-not-nil check-arg]]))
 
 ;;Ordering creation and manipulation
 (defn order-by
@@ -157,7 +157,7 @@
 
 (defn ordered?
   "Returns true if each element in iterable after the first is greater than or equal to the element that preceded it, according to the ordering."
-  {:tag boolean :added "0.1"}
+  {:added "0.1"}
   ([col]
      (check-not-nil *ordering* "*ordering* is not bound")
      (ordered? *ordering* col))
@@ -166,7 +166,7 @@
 
 (defn strictly-ordered?
   "Returns true if each element in iterable after the first is strictly greater than the element that preceded it, according to the ordering."
-  {:tag boolean :added "0.1"}
+  {:added "0.1"}
   ([col]
      (check-not-nil *ordering* "*ordering* is not bound")
      (strictly-ordered? *ordering* col))
@@ -174,7 +174,7 @@
      (.isStrictlyOrdered ord (seq col))))
 
 (defmacro with-ordering
-  "Bind *ordering* to the given ordering and evalute body with this binding."
+  "Bind *ordering* to the given ordering and evalute body with the binding."
   {:added "0.1"}
   [^Ordering ord & body]
   `(binding [*ordering* ~ord]
@@ -220,7 +220,182 @@
   [coll key]
   (.containsKey ^java.util.Map coll key))
 
+(defmethod include? Range
+  [coll key]
+  (.contains ^Range coll key))
+
 (defmethod include? :default
   [coll key]
   (when (seq coll)
     (or (= key (first coll)) (recur (next coll) key))))
+
+(def ^:private character-discrete-domains
+  (proxy [DiscreteDomain java.io.Serializable] []
+    (next [^Character ch]
+      (when-not (= ch Character/MAX_VALUE)
+        (char (inc (int ch)))))
+    (previous [^Character ch]
+      (when-not (= ch Character/MIN_VALUE)
+        (char (dec (int ch)))))
+    (distance [^Character start ^Character end]
+      (- (int start) (int end)))
+    (minValue [] (Character/MIN_VALUE))
+    (maxValue [] (Character/MAX_VALUE))))
+
+(defn- ^{:tag DiscreteDomain } get-discrete-domain
+  [clazz]
+  (case clazz
+    (#=java.lang.Long #=java.lang.Integer) (DiscreteDomains/longs)
+    #=java.lang.Character character-discrete-domains
+    nil))
+
+(defn- check-range-elements-type
+  [& es]
+  (doseq [e es]
+    (check-not-nil (get-discrete-domain (class e)) "Only supports integers and characters ranges.")))
+
+(defmacro create-ranges
+  [method & es]
+  (apply check-range-elements-type es)
+  `(. Ranges ~method ~@es))
+
+(defmacro ranges
+  "Create a integers or characters range,for example:
+      (ranges)          Returns a unbound range;
+      (ranges 0)        Returns a range that contains only the given value 0;
+      (ranges .. 0)     Returns a range that contains all values less than or equal to 0;
+      (ranges ... 0)    Returns a range that contains all values strictly less than 0;
+      (ranges 0 ..)     Returns a range that contains all values greater than or equal to 0;
+      (ranges 0 ...)    The same with (ranges 0 ..) ;
+      (ranges 0 .. 10)  Returns a range that contains all values greater than or equal to 0 and less than or equal to 10;
+      (ranges 0 ... 10) Returns a range that contains all values greater than or equal to 0 and strictly less than 10 ;
+      (ranges \\a \\z)   The same with (ranges \\a .. \\z).
+  "
+  {:added "0.1" :tag Range}
+  ([x]
+     `(create-ranges singleton ~x))
+  ([x y]
+     (condp = x
+       '.. `(create-ranges atMost ~y)
+       '... `(create-ranges lessThan ~y)
+       (condp = y
+         '.. `(create-ranges atLeast ~x)
+         '... `(create-ranges atLeast ~x)
+         `(create-ranges closed ~x ~y))))
+  ([start op end]
+     (check-range-elements-type start end)
+     `(condp = (quote ~op)
+        '.. (create-ranges closed ~start ~end)
+        '... (create-ranges closedOpen ~start ~end)
+        (throw (IllegalArgumentException. (format "Unknow symbol for range:%s" (quote ~op)))))))
+
+(defn empty?
+  "Returns true if the range is of the form [v..v) or (v..v]."
+  {:added "0.1"}
+  [^Range r]
+  (.isEmpty r))
+
+(def ^{:added "0.1" :doc "Bound type for ranges" :tag clojure.lang.IPersistentMap}
+  BOUND-TYPES
+  {BoundType/CLOSED :closed
+   BoundType/OPEN  :open})
+
+(defn lower-bound?
+  "Returns true if the range has a lower endpoint."
+  {:added "0.1"}
+  [^Range r]
+  (.hasLowerBound r))
+
+(defn upper-bound?
+  "Returns true if the range has an upper endpoint."
+  {:added "0.1"}
+  [^Range r]
+  (.hasUpperBound r))
+
+(defn bounded?
+  "Returns true if the range is bounded."
+  {:added "0.1"}
+  [r]
+  (and (upper-bound? r) (lower-bound? r)))
+
+(defn lower-bound
+  "Returns the lower endpoint and type of the range"
+  {:added "0.1" :tag clojure.lang.IPersistentMap}
+  [^Range r]
+  {:type (BOUND-TYPES (.lowerBoundType r)) :value (.lowerEndpoint r)})
+
+(defn lower-bound
+  "Returns the upper endpoint and type of the range"
+  {:added "0.1" :tag clojure.lang.IPersistentMap}
+  [^Range r]
+  {:type (BOUND-TYPES (.upperBoundType r)) :value (.upperEndpoint r)})
+
+(defn lower
+  "Returns the lowest value of the range,otherwise returns nil."
+  {:added "0.1" :tag clojure.lang.IPersistentMap}
+  [^Range r]
+  (check-arg (lower-bound? r) "The range is unbounded below:%s" r)
+  (let [v (.lowerEndpoint r)
+        bt (BOUND-TYPES (.lowerBoundType r))]
+    (when bt
+      (case bt
+        :closed v
+        :open
+        (when-let [dd (get-discrete-domain (class v))]
+          (.next dd v))))))
+
+(defn upper
+  " Returns the highest value of the range,otherwise returns nil"
+  {:added "0.1"}
+  [^Range r]
+  (check-arg (upper-bound? r) "The range is unbounded above:%s" r)
+  (let [v (.upperEndpoint r)
+        bt (BOUND-TYPES (.upperBoundType r))]
+    (when bt
+      (case bt
+        :closed v
+        :open
+        (when-let [dd (get-discrete-domain (class v))]
+          (.previous dd v))))))
+
+(defn include-all?
+  "Returns true if every element in values is contained in the range."
+  {:added "0.1"}
+  [^Range r ^Iterable values]
+  (.containsAll r values))
+
+(defn encloses?
+  "Returns true if the bounds of right do not extend outside the bounds of left range."
+  {:added "0.1"}
+  [^Range left ^Range right]
+  (.encloses left right))
+
+(defn connected?
+  "Returns true if there exists a (possibly empty) range which is enclosed by both left range and right."
+  {:added "0.1"}
+  [^Range left ^Range right]
+  (.isConnected left right))
+
+(defn intersection
+  "Returns the maximal range enclosed by both left range and right, if such a range exists."
+  {:added "0.1" :tag Range}
+  [^Range left ^Range right]
+  (.intersection left right))
+
+(defn union
+  "Returns the minimal range that encloses both left range and right."
+  {:added "0.1" :tag Range}
+  [^Range left ^Range right]
+  (.span left right))
+
+(defn as-seq
+  "Returns a sequence for bounded range in order,now it just support integers and characters range."
+  {:added "0.1" :tag clojure.lang.ISeq}
+  [^Range r]
+  (check-arg (or (upper-bound? r) (lower-bound? r)) "The range is unbounded:%s" r)
+  (let [x (cond
+           (upper-bound? r) (upper r)
+           (lower-bound? r) (lower r))
+        dd (get-discrete-domain (class x))]
+    (check-not-nil dd "The range element type is not integers or characters:%s" (str (class x)))
+    (seq (.asSet r dd))))
