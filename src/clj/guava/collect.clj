@@ -318,19 +318,19 @@
   (and (upper-bound? r) (lower-bound? r)))
 
 (defn lower-bound
-  "Returns the lower endpoint and type of the range"
+  "Returns the lower endpoint and bound type of the range"
   {:added "0.1" :tag clojure.lang.IPersistentMap}
   [^Range r]
   {:type (BOUND-TYPES (.lowerBoundType r)) :value (.lowerEndpoint r)})
 
 (defn upper-bound
-  "Returns the upper endpoint and type of the range"
+  "Returns the upper endpoint and bound type of the range"
   {:added "0.1" :tag clojure.lang.IPersistentMap}
   [^Range r]
   {:type (BOUND-TYPES (.upperBoundType r)) :value (.upperEndpoint r)})
 
 (defn lower
-  "Returns the lowest value of the range,otherwise returns nil."
+  "Returns the lowest value of the range,otherwise throw IllegalArgumentException."
   {:added "0.1" :tag clojure.lang.IPersistentMap}
   [^Range r]
   (check-arg (lower-bound? r) "The range is unbounded below:%s" r)
@@ -344,7 +344,7 @@
           (.next dd v))))))
 
 (defn upper
-  " Returns the highest value of the range,otherwise returns nil"
+  " Returns the highest value of the range,otherwise throw IllegalArgumentException."
   {:added "0.1"}
   [^Range r]
   (check-arg (upper-bound? r) "The range is unbounded above:%s" r)
