@@ -84,3 +84,9 @@
 ; There's no need to override <, >, <=, >=, =, ==, 
 ; because clojure support comparing between java.lang.Number
 ; and both UnsignedInteger and UnsignedLong extends java.lang.Number
+
+(defmethod print-method UnsignedInteger [u ^java.io.Writer w]
+  (.write w (str "#ui " u)))
+
+(defmethod print-dup UnsignedInteger [o w]
+  (print-method o w))

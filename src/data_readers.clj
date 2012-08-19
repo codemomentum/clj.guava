@@ -1,4 +1,4 @@
 ; for reader literal of unsigned int/long
 
-{u/i clj.guava.primitive.uint/uint,
- u/l clj.guava.primitive.ulong/ulong}
+{ui clj.guava.primitive.uint/uint,
+ ul clj.guava.primitive.ulong/ulong}

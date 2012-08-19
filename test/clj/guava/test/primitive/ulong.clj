@@ -96,3 +96,11 @@
       (is (<= c c b b a a))
       ))
   )
+
+(deftest reader-literal
+  (testing "ulong reader literal"
+    (is (instance? UnsignedLong #ul 12))
+    (is (instance? UnsignedLong (+ #ul 12 #ul 12)))
+    (is (= #ul 24 (+ #ul 12 #ul 12)))
+  )
+  )
