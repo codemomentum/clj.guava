@@ -100,3 +100,9 @@
       ))
   )
 
+(deftest reader-literal
+  (testing "uint reader literal"
+    (is (instance? UnsignedInteger #ui 12))
+    (is (instance? UnsignedInteger (+ #ui 12 #ui 12)))
+    (is (= 24 (+ #ui 12 #ui 12))))
+  )
