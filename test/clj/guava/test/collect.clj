@@ -1,5 +1,5 @@
 (ns clj.guava.test.collect
-  (:refer-clojure :exclude [sort max min reverse])
+  (:refer-clojure :exclude [sort max min reverse empty?])
   (:use [clj.guava.collect])
   (:use [clojure.test])
   (:use [clj.guava.base :only [not-nil? bfalse? btrue?]]))
@@ -126,3 +126,112 @@
       (is (ordered? '(1 2 3 4)))
       (is (< (cmp 1 2) 0))
       (is (= '(1 2 3 4) (sort '(3 4 1 2)))))))
+
+(deftest test-ranges
+  (testing "create ranges"
+    (is (= '(1 2 3 4 5) (as-seq (ranges 1 .. 5))))
+    (is (= '(1 2 3 4 5) (as-seq (ranges 1 5))))
+    (is (= '(1 2 3 4) (as-seq (ranges 1 ... 5))))
+    (is (thrown? NullPointerException (eval '(clj.guava.collect/ranges "a"))))
+    (is (thrown? NullPointerException (eval '(clj.guava.collect/ranges "a" ..))))
+    (is (thrown? NullPointerException (eval '(clj.guava.collect/ranges "a" ...))))
+    (is (thrown? NullPointerException (eval '(clj.guava.collect/ranges  .. "a"))))
+    (is (thrown? NullPointerException (eval '(clj.guava.collect/ranges  ... "a"))))
+    (is (thrown? NullPointerException (eval '(clj.guava.collect/ranges   "a" .. "z"))))
+    (is (thrown? NullPointerException (eval '(clj.guava.collect/ranges   "a" ... "z"))))
+    (is (= '(\a \b \c \d) (as-seq (ranges \a \d))))
+    (is (= '(0) (as-seq (ranges 0))))))
+
+(deftest test-lower-upper-empty?
+  (let [a (ranges 0 .. 5)
+        b (ranges 0 ... 5)
+        c (ranges 0)
+        d (ranges 0 ..)
+        e (ranges ... 5)]
+    (is (upper-bound? a))
+    (is (upper-bound? b))
+    (is (upper-bound? c))
+    (is (not (upper-bound? d)))
+    (is (upper-bound? e))
+    (is (lower-bound? a))
+    (is (lower-bound? b))
+    (is (lower-bound? c))
+    (is (lower-bound? d))
+    (is (not (lower-bound? e)))
+    (is (bounded? a))
+    (is (bounded? b))
+    (is (bounded? c))
+    (is (not (bounded? d)))
+    (is (not (bounded? e)))
+    (is (not (empty? a)))
+    (is (not (empty? b)))
+    (is (not (empty? c)))
+    (is (not (empty? d)))
+    (is (empty? (ranges 0 ... 0)))
+    (is (not (empty? e)))
+
+    (testing "lower and upper"
+      (is (= 0 (lower a)))
+      (is (= 0 (lower b)))
+      (is (= 0 (lower c)))
+      (is (= 0 (lower d)))
+      (is (thrown? IllegalArgumentException (lower e)))
+
+      (is (= 5 (upper a)))
+      (is (= 4 (upper b)))
+      (is (= 0 (upper c)))
+      (is (= 0 (lower (ranges 0 ... 0))))
+      (is (thrown? IllegalArgumentException (upper d)))
+      (is (= 4 (upper e))))))
+
+(deftest test-include-include-all?
+  (let [r (ranges 0 .. 100)]
+    (is (include? r 0))
+    (is (include? r 100))
+    (is (include? r 50))
+    (is (not (include? r -1)))
+    (is (not (include? r 101)))
+
+    (is (include-all? r '(1 2 3)))
+    (is (include-all? r '(90 91 92)))
+    (is (include-all? r [0 1 2 3 4 5 6 7 8 9 0]))
+    (is (not (include-all? r [-1 0 1 2 3])))
+    (is (include? (ranges -1 ... 1) 0))
+    (is (include? (ranges -1 ... 1) -1))
+    (is (include-all? (ranges -1 ... 1) [0 -1]))
+    (is (not (include? (ranges -1 ... 1) 1)))))
+
+(deftest test-encloses?
+  (let [a (ranges 3 .. 6)
+        b (ranges 4 .. 5)
+        c (ranges 4 ... 4)
+        d (ranges 3 ... 6)
+        e (ranges 4 .. 6)]
+
+    (is (encloses? a b))
+    (is (encloses? a a ))
+    (is (encloses? a c))
+    (is (not (encloses? e a)))))
+
+(deftest test-connected?
+  (is (connected? (ranges 0 5) (ranges 5 10)))
+  (is (connected? (ranges 0 5) (ranges 3 9)))
+  (is (not (connected? (ranges 1 5) (ranges 6 10))))
+  (is (connected? (ranges 1 ... 5) (ranges 5 10)))
+  (is (connected? (ranges 0 9) (ranges 3 4))))
+
+(deftest test-intersection
+  (is (thrown? IllegalArgumentException (intersection (ranges 3 4) (ranges 5 10))))
+  (is (= '(3 4) (as-seq (intersection (ranges 0 9) (ranges 3 4)))))
+  (is (= '(3 4 5) (as-seq (intersection (ranges 0 5) (ranges 3 9)))))
+  (is (thrown? IllegalArgumentException (intersection (ranges 1 5) (ranges 6 0))))
+  (is (= '(5) (as-seq (intersection (ranges 1 5) (ranges 5 10))))))
+
+(deftest test-union
+  (is (= (ranges 3 10) (union (ranges 3 5) (ranges 5 10))))
+  (is (= (ranges 0 9) (union (ranges 0 9) (ranges 3 4))))
+  (is (= (ranges 0 9) (union (ranges 0 5) (ranges 3 9))))
+  (is (= (ranges 1 10) (union (ranges 1 5) (ranges 6 10))))
+  (is (= (ranges 0 9) (union (ranges 0) (ranges  1 9))))
+  (is (= (ranges 0 9) (union (ranges 0 ... 0) (ranges  1 9))))
+  )
